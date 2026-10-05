@@ -42,15 +42,7 @@ The look is dark panels, green and purple team colors, the Syne typeface in wide
 
 ## Adding it to OBS
 
-1. Start TSH and select **Brawlhalla** as the game.
-2. In OBS, add a **Browser** source:
-   - **URL:** `http://localhost:5500/layout/scoreboard_brawlhalla/index.html`
-     Use whichever port your TSH web server runs on. 5500 is the default (TSH setting `general.webserver_port`).
-   - **Width / Height:** `1920` × `1080`
-   - Leave the default transparent background CSS in place.
-3. The scoreboard fades and slides in once it receives match data from TSH. It updates live as you edit the match in TSH.
-
-You can also use **Local file** mode in OBS and point it at `index.html`. TSH's scripts handle OBS's local-file mode.
+Use **Local file** mode in OBS and point it at `index.html`. TSH's scripts handle OBS's local-file mode.
 
 ### Multiple scoreboards
 

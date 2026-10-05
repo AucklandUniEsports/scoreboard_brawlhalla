@@ -1,5 +1,8 @@
 # Brawlhalla Scoreboard for TournamentStreamHelper
 
+<iframe width="560" height="315" src="https://youtu.be/prlm6ZDzRbs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
 A broadcast scoreboard overlay for Brawlhalla, built as a layout for [TournamentStreamHelper (TSH)](https://github.com/joaorb64/TournamentStreamHelper). It's designed for **2v2** and falls back to **1v1** automatically.
 
 - **Bottom bar:** each player gets a character portrait, their tag, a sponsor prefix, and an info line (country flag, seed, pronouns). The scores sit in the middle with the phase, match name and "best of" text between them.

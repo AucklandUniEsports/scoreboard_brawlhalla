@@ -1,0 +1,78 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="../include/globals.js"></script>
+    <link rel="stylesheet" href="../main.css" />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="anim_container_outer">
+      <div class="anim_container_inner">
+        <!-- Tournament name tab tucked into the top-left corner -->
+        <div class="top_bar">
+          <div class="tournament_name font-scale-fit"></div>
+          <div class="event_name font-scale-fit"></div>
+        </div>
+
+        <!-- Team name tabs, sitting on top of each half of the bar (2v2 only) -->
+        <div class="p1 team_tab fade_up font-scale-fit"></div>
+        <div class="p2 team_tab fade_up font-scale-fit"></div>
+
+        <div class="scorebar fade_up">
+          <div class="p1 side">
+            <div class="p1 slot s1">
+              <div class="character_container"></div>
+              <div class="name_block">
+                <div class="sponsor font-scale-fit"></div>
+                <div class="name font-scale-fit"></div>
+              </div>
+              <div class="info font-scale-fit"></div>
+            </div>
+            <div class="p1 slot s2">
+              <div class="character_container"></div>
+              <div class="name_block">
+                <div class="sponsor font-scale-fit"></div>
+                <div class="name font-scale-fit"></div>
+              </div>
+              <div class="info font-scale-fit"></div>
+            </div>
+          </div>
+
+          <div class="center">
+            <div class="p1 score font-scale-fit"></div>
+            <div class="center_text">
+              <div class="phase font-scale-fit"></div>
+              <div class="match font-scale-fit"></div>
+              <div class="best_of font-scale-fit"></div>
+            </div>
+            <div class="p2 score font-scale-fit"></div>
+          </div>
+
+          <div class="p2 side">
+            <div class="p2 slot s1">
+              <div class="character_container"></div>
+              <div class="name_block">
+                <div class="sponsor font-scale-fit"></div>
+                <div class="name font-scale-fit"></div>
+              </div>
+              <div class="info font-scale-fit"></div>
+            </div>
+            <div class="p2 slot s2">
+              <div class="character_container"></div>
+              <div class="name_block">
+                <div class="sponsor font-scale-fit"></div>
+                <div class="name font-scale-fit"></div>
+              </div>
+              <div class="info font-scale-fit"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p1 losers_container fade"></div>
+        <div class="p2 losers_container fade"></div>
+      </div>
+    </div>
+
+    <script src="index.js"></script>
+  </body>
+</html>

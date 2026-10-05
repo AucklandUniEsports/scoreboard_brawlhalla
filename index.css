@@ -1,0 +1,497 @@
+/* Brawlhalla bottom scorebar — 2v2 (falls back to 1v1).
+   Visual language borrowed from the OW map overlay: near-black panels,
+   green / purple team accents, Syne in wide-tracked uppercase, slanted edges. */
+
+@font-face {
+  font-family: "Syne";
+  src: url("./fonts/Syne.ttf") format("truetype");
+  font-weight: 400 800;
+}
+
+:root {
+  --bh-font: "Syne", var(--font);
+
+  /* Palette lifted from the OW map overlay */
+  --bh-text: #f4f2fa;
+  --bh-text-soft: #d7d2e4;
+  --bh-text-dim: #bcb4cf;
+  --bh-ink: #0d0b12;
+  --bh-panel: rgba(16, 14, 21, 0.94);
+  --bh-panel-2: rgba(28, 25, 38, 0.94);
+  --bh-strip: #1a1723;
+  --bh-line: rgba(255, 255, 255, 0.08);
+
+  /* Team accents — OW overlay green (A) / purple (B) */
+  --p1-accent: #a3d934;
+  --p1-accent-dim: rgba(163, 217, 52, 0.16);
+  --p2-accent: #a78fe0;
+  --p2-accent-dim: rgba(167, 143, 224, 0.18);
+
+  --bar-width: 1672px;
+  --bar-height: 92px;
+  --strip-height: 28px;
+  --center-width: 452px;
+  --center-rise: 16px;
+  --slant: 28px;
+}
+
+body {
+  font-family: var(--bh-font);
+  font-weight: 700;
+  color: var(--bh-text);
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  width: 1920px;
+  height: 1080px;
+}
+
+.anim_container_outer,
+.anim_container_inner {
+  position: absolute;
+  overflow: hidden;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1920px;
+  height: 1080px;
+}
+
+/* ─── Bar ────────────────────────────────────────────────────────────────── */
+/* The bar itself never clips, so character portraits can break out the top;
+   the slanted panel is painted by ::before instead. */
+.scorebar {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - var(--bar-width) / 2);
+  width: var(--bar-width);
+  height: var(--bar-height);
+  display: flex;
+  align-items: flex-end;
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.45));
+}
+
+.scorebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, var(--bh-panel) 0%, var(--bh-panel-2) 50%, var(--bh-panel) 100%);
+  clip-path: polygon(
+    var(--slant) 0,
+    calc(100% - var(--slant)) 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+/* Accent hairline along the top edge — green fading into purple */
+.scorebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--slant);
+  right: var(--slant);
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--p1-accent) 0%,
+    color-mix(in srgb, var(--p1-accent) 30%, transparent) 38%,
+    color-mix(in srgb, var(--p2-accent) 30%, transparent) 62%,
+    var(--p2-accent) 100%
+  );
+}
+
+/* ─── Sides / player slots ───────────────────────────────────────────────── */
+.side {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+}
+.p2.side {
+  flex-direction: row-reverse;
+}
+
+/* Info strip under each side — a darker band with a faint team-tinted top line */
+.side::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--strip-height);
+  background: var(--bh-strip);
+  border-top: 1px solid var(--bh-line);
+}
+.p1.side::before {
+  background: linear-gradient(90deg, var(--p1-accent-dim), transparent 70%), var(--bh-strip);
+  clip-path: polygon(calc(var(--slant) * 0.3) 0, 100% 0, 100% 100%, 0 100%);
+}
+.p2.side::before {
+  background: linear-gradient(270deg, var(--p2-accent-dim), transparent 70%), var(--bh-strip);
+  clip-path: polygon(0 0, calc(100% - var(--slant) * 0.3) 0, 100% 100%, 0 100%);
+}
+
+.slot {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Portrait card pokes out above the bar, anchored to the slot's outer edge.
+   BH icons are square art with a baked-in background, so they get a slanted
+   card (same lean as the bar edges) with a team-accent foot. */
+.slot .character_container {
+  position: absolute;
+  bottom: calc(var(--strip-height) - 6px);
+  width: 116px;
+  height: 116px;
+  z-index: 2;
+  background: #1c1926;
+}
+/* No character picked yet — hide the card instead of showing an empty frame */
+.slot .character_container:empty {
+  display: none;
+}
+.slot .character_container::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  z-index: 3;
+}
+.p1 .slot .character_container {
+  left: 16px;
+  clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
+}
+.p1 .slot .character_container::after {
+  background: var(--p1-accent);
+}
+.p2 .slot .character_container {
+  right: 16px;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 100%, 16px 100%);
+}
+.p2 .slot .character_container::after {
+  background: var(--p2-accent);
+}
+
+.name_block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  line-height: 1.05;
+  padding-top: 4px;
+}
+.p1 .name_block {
+  padding-left: 140px;
+  padding-right: 18px;
+  align-items: flex-start;
+}
+.p2 .name_block {
+  padding-right: 140px;
+  padding-left: 18px;
+  align-items: flex-end;
+}
+
+.sponsor {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  height: 14px;
+  width: 100%;
+}
+.p1 .sponsor {
+  color: var(--p1-accent);
+}
+.p2 .sponsor {
+  color: var(--p2-accent);
+}
+
+.name {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  height: 32px;
+  width: 100%;
+}
+
+/* TSH wraps contents in .text, centred by default — re-align per side */
+.p1 .name .text,
+.p1 .sponsor .text {
+  justify-content: flex-start;
+}
+.p2 .name .text,
+.p2 .sponsor .text {
+  justify-content: flex-end;
+}
+
+.info {
+  height: var(--strip-height);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bh-text-dim);
+  display: flex;
+  align-items: center;
+}
+.p1 .info {
+  padding-left: 140px;
+  padding-right: 18px;
+}
+.p2 .info {
+  padding-right: 140px;
+  padding-left: 18px;
+}
+.p1 .info .text {
+  justify-content: flex-start;
+}
+.p2 .info .text {
+  justify-content: flex-end;
+}
+
+.info .flag {
+  height: 14px;
+  width: auto;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+.info .sep {
+  display: inline-block;
+  width: 2px;
+  height: 13px;
+  margin: 0 9px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ─── Center (scores + match info) ───────────────────────────────────────── */
+.center {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 var(--center-width);
+  width: var(--center-width);
+  min-width: 0;
+  height: calc(var(--bar-height) + var(--center-rise));
+  display: flex;
+  align-items: stretch;
+  background: var(--bh-panel);
+  clip-path: polygon(
+    var(--slant) 0,
+    calc(100% - var(--slant)) 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+.score {
+  flex: 0 0 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--bh-ink);
+}
+.p1.score {
+  background: var(--p1-accent);
+  padding-left: 18px;
+}
+.p2.score {
+  background: var(--p2-accent);
+  padding-right: 18px;
+}
+
+.center_text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 26px;
+  overflow: hidden;
+  text-transform: uppercase;
+  text-align: center;
+}
+.center_text > div {
+  width: 100%;
+}
+.phase {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--bh-text-dim);
+  height: 13px;
+}
+.match {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  height: 22px;
+}
+.best_of {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  height: 13px;
+  color: var(--bh-text-soft);
+}
+
+/* ─── Team name tabs (2v2) ───────────────────────────────────────────────── */
+/* Small slanted tabs resting on the bar, against the center block. */
+.team_tab {
+  position: absolute;
+  bottom: var(--bar-height);
+  height: 30px;
+  max-width: 380px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #e9e4f6;
+  background: var(--bh-panel);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.p1.team_tab {
+  right: calc(50% + var(--center-width) / 2 + 4px);
+  border-left: 3px solid var(--p1-accent);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+  padding-right: 26px;
+}
+.p2.team_tab {
+  left: calc(50% + var(--center-width) / 2 + 4px);
+  border-right: 3px solid var(--p2-accent);
+  clip-path: polygon(14px 0, 100% 0, 100% 100%, 0 100%);
+  padding-left: 26px;
+}
+.team_tab.text_empty {
+  display: none;
+}
+
+/* ─── Losers marker — sits on top of the score block ─────────────────────── */
+/* Spans the score block's top edge, inset by the center's slant */
+.losers_container {
+  position: absolute;
+  bottom: calc(var(--bar-height) + var(--center-rise));
+  width: 82px;
+  height: 24px;
+}
+.p1.losers_container {
+  left: calc(50% - var(--center-width) / 2 + var(--slant));
+}
+.p2.losers_container {
+  right: calc(50% - var(--center-width) / 2 + var(--slant));
+}
+.losers {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  background: var(--bh-panel);
+  border-radius: 3px 3px 0 0;
+  animation: pickPulse 1.6s ease-in-out infinite;
+}
+.p1 .losers {
+  color: var(--p1-accent);
+}
+.p2 .losers {
+  color: var(--p2-accent);
+}
+
+@keyframes pickPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ─── Top bar (tournament name) ──────────────────────────────────────────── */
+/* Corner tab tucked into the top-left — flush with the screen edges, slanted
+   on the inner side. Sizes to the name, capped so FitText takes over. */
+.top_bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 340px;
+  max-width: 640px;
+  height: 64px;
+  padding: 0 calc(var(--slant) + 28px) 3px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(100deg, var(--bh-panel) 0%, var(--bh-panel-2) 100%);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
+  filter: drop-shadow(0 6px 24px rgba(0, 0, 0, 0.45));
+}
+/* Accent hairline along the bottom edge — green fading into purple */
+.top_bar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: var(--slant);
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--p1-accent) 0%,
+    color-mix(in srgb, var(--p1-accent) 40%, transparent) 55%,
+    var(--p2-accent) 100%
+  );
+}
+.top_bar > div {
+  width: 100%;
+}
+.top_bar .text {
+  justify-content: flex-start;
+}
+.tournament_name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  height: 24px;
+}
+.event_name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: var(--bh-text-dim);
+  height: 13px;
+}
+.top_bar.no_event .event_name {
+  display: none;
+}
+
+/* ─── 1v1 fallback ───────────────────────────────────────────────────────── */
+/* One slot per side; the bar tightens up so it doesn't look empty. */
+body.singles {
+  --bar-width: 1392px;
+}
+body.singles .slot.s2 {
+  display: none;
+}
